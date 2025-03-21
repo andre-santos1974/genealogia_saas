@@ -14,9 +14,9 @@ ALGORITHM = "HS256"
 
 
 def create_access_token(
-    subject: Union[str, Any], expires_delta: timedelta = None
+    subject: Union[str, Any], expires_delta: timedelta = None, **extra_data
 ) -> str:
-    """Cria um token JWT de acesso."""
+    """Cria um token JWT de acesso com dados adicionais."""
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
@@ -24,6 +24,10 @@ def create_access_token(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     to_encode = {"exp": expire, "sub": str(subject)}
+    
+    # Adicionar dados extras ao payload do token
+    to_encode.update(extra_data)
+    
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
