@@ -1,0 +1,116 @@
+Criação do SaaS de Organização Genealógica (Passo a Passo):
+
+Definição do Modelo de Dados (Banco de Dados):
+
+Entidade: Organização:
+Campos:
+nome (Texto, Obrigatório), email (Email, Obrigatório, Único), cnpj (Texto, Opcional), plano_assinatura_id (Chave Estrangeira para PlanoAssinatura), data_assinatura (Data), status_assinatura (Texto: "Ativa", "Inativa", "Pendente").
+Entidade: PlanoAssinatura:
+Campos: 
+nome (Texto, Obrigatório, Único), preco (Decimal, Obrigatório), limite_animais (Inteiro, Obrigatório), descricao (Texto, Opcional), funcionalidades (Texto, Opcional, JSON para lista de funcionalidades).
+Entidade: UsuarioAdminSaaS:
+Campos: 
+nome (Texto, Obrigatório), email (Email, Obrigatório, Único), senha (Senha Criptografada, Obrigatória), permissoes (Texto, Opcional, JSON para lista de permissões).
+Entidade: Animal:
+Campos: 
+organizacao_id (Chave Estrangeira para Organização, Obrigatório), nome (Texto, Obrigatório), especie (Texto, Obrigatório), raca (Texto, Opcional), data_nascimento (Data, Opcional), sexo (Texto, Opcional, "Macho", "Fêmea", "Indefinido"), caracteristicas_fisicas (Texto, Opcional), imagem_url (URL, Opcional), pai_id (Chave Estrangeira para Animal, Opcional, Auto-relacionamento), mae_id (Chave Estrangeira para Animal, Opcional, Auto-relacionamento).
+
+Relacionamentos:
+Organização TEM MUITOS Animais (Um-para-Muitos).
+Organização TEM UM PlanoAssinatura (Um-para-Um, via plano_assinatura_id).
+PlanoAssinatura É USADO POR MUITAS Organizações (Um-para-Muitos, relação inversa).
+Animal PODE TER UM Pai (Auto-relacionamento, Um-para-Um ou Um-para-Muitos se permitir múltiplos pais, ajustar conforme necessidade).
+Animal PODE TER UMA Mãe (Auto-relacionamento, Um-para-Um ou Um-para-Muitos se permitir múltiplas mães, ajustar conforme necessidade).
+Criação do Backend (APIs REST):
+
+Gerar APIs REST completas (CRUD) para cada entidade definida no modelo de dados: Organização, PlanoAssinatura, UsuarioAdminSaaS, Animal.
+Implementar autenticação e autorização para as APIs:
+Proteger as APIs administrativas com autenticação de UsuarioAdminSaaS.
+Proteger as APIs de gerenciamento de animais com autenticação baseada em sessão ou JWT para usuários de Organização (usuários seriam gerenciados dentro do contexto de cada organização, não definidos aqui para simplificar, mas pode ser adicionado se necessário).
+Implementar lógica de negócios básica:
+Verificação de limite de animais por plano de assinatura ao criar um novo animal.
+Lógica para gerenciamento de status de assinatura ao receber notificações de pagamento (Webhook - simular endpoint para receber notificações).
+Criação do Frontend (Interface de Usuário):
+
+Gerar páginas de frontend para:
+Login/Registro de Organização.
+Listagem e detalhe de Planos de Assinatura (página pública).
+Dashboard para usuários logados (após login de Organização):
+Visão geral da organização (número de animais, plano, etc.).
+Menu de navegação.
+Páginas CRUD para gerenciamento de Animais (dentro do Dashboard da Organização):
+Listagem de animais (tabela paginada, busca, filtros).
+Formulário de criação/edição de animal (com campos definidos no modelo de dados).
+Página de detalhe de animal com visualização da árvore genealógica (inicialmente, apenas exibir pais e mães, árvore genealógica completa pode ser um recurso futuro mais complexo).
+Painel Administrativo do SaaS (protegido por login de UsuarioAdminSaaS):
+Dashboard administrativo (visão geral da plataforma).
+Páginas CRUD para gerenciamento de Organizações.
+Páginas CRUD para gerenciamento de Planos de Assinatura.
+Páginas CRUD para gerenciamento de UsuarioAdminSaaS.
+Integração de Pagamento (Simulação Inicial):
+
+Implementar uma simulação básica da integração de pagamento:
+Na página de planos, ao clicar em "Assinar", exibir uma mensagem de "Assinatura simulada com sucesso!" e atualizar o status da assinatura da organização no banco de dados para "Ativa".
+Em um passo futuro, substituir esta simulação pela integração real com Stripe/PayPal/Mercado Pago.
+Deploy Inicial (Simulação):
+
+Simular um processo de deploy para um ambiente de teste (pode ser um ambiente local inicialmente, ou um ambiente de staging se o builder oferecer essa opção).
+Observações para o Builder:
+
+Utilizar o  Python, banco de dados PostgreSQL
+
+Gerar código limpo, modular e bem comentado.
+Incluir documentação básica das APIs geradas e da estrutura do frontend.
+Permitir a customização do código gerado posteriormente (acesso ao código fonte).
+8. Modelo de Banco de Dados e Relacionamentos (Diagrama ER):
+
+Um modelo de banco de dados relacional para este SaaS pode ser representado da seguinte forma:
+Abre em uma nova janela
+www.lucidchart.com
+Modelo de Banco de Dados Genealógico SaaS Diagrama ER
+
+Descrição e criação das Tabelas e Relacionamentos:
+
+Organizacoes (Organizations):
+
+organizacao_id (PK, UUID ou Auto-incremento) - Identificador único da organização.
+nome (VARCHAR) - Nome da organização.
+email (VARCHAR, UNIQUE) - Email da organização para login e contato.
+cnpj (VARCHAR, UNIQUE, NULLABLE) - CNPJ da organização (opcional).
+plano_assinatura_id (FK para PlanosAssinatura) - Chave estrangeira referenciando o plano de assinatura da organização.
+data_assinatura (DATE) - Data em que a organização assinou o plano.
+status_assinatura (VARCHAR) - Status da assinatura ("Ativa", "Inativa", "Pendente").
+PlanosAssinatura (Subscription Plans):
+
+plano_assinatura_id (PK, UUID ou Auto-incremento) - Identificador único do plano de assinatura.
+nome (VARCHAR, UNIQUE) - Nome do plano (Ex: "Bronze", "Prata", "Ouro").
+preco (DECIMAL) - Preço do plano.
+limite_animais (INTEGER) - Limite máximo de animais que podem ser cadastrados no plano.
+descricao (TEXT, NULLABLE) - Descrição do plano.
+funcionalidades (JSON, NULLABLE) - Lista de funcionalidades inclusas no plano (pode ser armazenado como JSON para flexibilidade).
+UsuariosAdminSaaS (SaaS Admin Users):
+
+usuario_admin_saas_id (PK, UUID ou Auto-incremento) - Identificador único do administrador do SaaS.
+nome (VARCHAR) - Nome do administrador.
+email (VARCHAR, UNIQUE) - Email do administrador para login.
+senha_hash (VARCHAR) - Hash da senha do administrador (NÃO armazenar senha em texto plano).
+permissoes (JSON, NULLABLE) - Permissões do administrador (pode ser armazenado como JSON para flexibilidade).
+Animais (Animals):
+
+animal_id (PK, UUID ou Auto-incremento) - Identificador único do animal.
+organizacao_id (FK para Organizacoes, NOT NULL) - Chave estrangeira referenciando a organização a qual o animal pertence.
+nome (VARCHAR) - Nome do animal.
+especie (VARCHAR) - Espécie do animal.
+raca (VARCHAR, NULLABLE) - Raça do animal (opcional).
+data_nascimento (DATE, NULLABLE) - Data de nascimento do animal (opcional).
+sexo (VARCHAR, NULLABLE) - Sexo do animal ("Macho", "Fêmea", "Indefinido").
+caracteristicas_fisicas (TEXT, NULLABLE) - Descrição de características físicas do animal.
+imagem_url (VARCHAR, NULLABLE) - URL da imagem do animal.
+pai_id (FK para Animais, NULLABLE, Auto-relacionamento) - Chave estrangeira referenciando o animal pai (auto-relacionamento).
+mae_id (FK para Animais, NULLABLE, Auto-relacionamento) - Chave estrangeira referenciando o animal mãe (auto-relacionamento).
+
+Relacionamentos Detalhados:
+
+Um-para-Muitos: Uma Organizacao pode ter muitos Animais.
+Um-para-Um (ou Um-para-Muitos dependendo da interpretação): Uma Organizacao tem um PlanoAssinatura (neste modelo, cada organização está associada a um único plano).
+Auto-relacionamento (Um-para-Um opcional): Um Animal pode ter um pai e uma mãe, ambos também sendo Animais (representando a genealogia). As colunas pai_id e mae_id são chaves estrangeiras que referenciam a própria tabela Animais.
